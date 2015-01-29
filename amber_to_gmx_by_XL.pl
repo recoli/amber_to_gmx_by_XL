@@ -23,7 +23,7 @@
    printf "       -glycam [yes_or_no]\n";
    printf "\n";
 
-	if (@ARGV==0) { exit; }
+   if (@ARGV==0) { exit; }
 
 #  options
 
@@ -465,18 +465,18 @@
       }
    }
 
-	my %atomtype;
-	for $i (1..$NATOM)
-	{
-		$atomtype{$ISYMBL[$i]} = 0;
-	}
+   my %atomtype;
+   for $i (1..$NATOM)
+   {
+      $atomtype{$ISYMBL[$i]} = 0;
+   }
    printf GTOP "[ atomtypes ]\n";
    printf GTOP "%-8s%-10s%-10s%-10s%-7s%15s%15s\n",
       ";name", "bond_type", "mass", "charge", "ptype", "sigma", "epsilon";
-	for $i (1..$NATOM)
-	{
-		if ($atomtype{$ISYMBL[$i]}==0)
-		{
+   for $i (1..$NATOM)
+   {
+      if ($atomtype{$ISYMBL[$i]}==0)
+      {
          for $itype (1..$NTYPES)
          {
             if ( $IAC[$i]==$itype )
@@ -485,9 +485,9 @@
                   $ISYMBL[$i], $ISYMBL[$i], 0.0, 0.0, "A", $sigma[$i], $epsilon[$i];
                last;
             }
- 	      }
-			$atomtype{$ISYMBL[$i]} = 1;
-		}
+          }
+         $atomtype{$ISYMBL[$i]} = 1;
+      }
    }
    printf GTOP "\n";
 
@@ -787,7 +787,7 @@
       $PK[$ip] *= 4.184;
 
 #     convert rad to degree
-		$PHASE[$ip] = $PHASE[$ip] / $pi * 180.0;
+      $PHASE[$ip] = $PHASE[$ip] / $pi * 180.0;
    }
 
 #  write dihedrals
@@ -797,7 +797,7 @@
       ";ai", "aj", "ak", "al", "funct", 
       "phi_s", "k_phi", "mult";
 
-	my $funct;
+   my $funct;
 
 #  dihedrals containing H atoms
 
@@ -811,12 +811,12 @@
 #     distinguish proper and improper
       if ( $LPH[$idih] >= 0.0 )
       {
-			$funct = 9;
-		}
-		else
-		{
-			$funct = 4;
-		}
+         $funct = 9;
+      }
+      else
+      {
+         $funct = 4;
+      }
 
 #     print atoms and parameters (note funct of 9 and 4 are used)
       printf GTOP "%-6d%-6d%-6d%-6d%-6d%10.3f%13.6f%6d ; %s-%s-%s-%s\n",
@@ -841,12 +841,12 @@
 #     distinguish proper and improper
       if ( $LP[$idih] >= 0.0 )
       {
-			$funct = 9;
-		}
-		else
-		{
-			$funct = 4;
-		}
+         $funct = 9;
+      }
+      else
+      {
+         $funct = 4;
+      }
 
 #     print atoms and parameters (note funct of 9 and 4 are used)
       printf GTOP "%-6d%-6d%-6d%-6d%-6d%10.3f%13.6f%6d ; %s-%s-%s-%s\n",
