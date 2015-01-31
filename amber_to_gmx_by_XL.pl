@@ -1,26 +1,47 @@
 #!/usr/bin/perl 
 
+#***********************************************************************
+#                ==== AMBER >>> to >>> GMX ====
+#  Convert AMBER top and crd files to GROMACS format
+#  Compatible with GLYCAM force field 
+#
+#  Copyright (C) Xin Li <lixin.reco@gmail.com>
+#
+#  This program is free software: you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation, either version 3 of the License, or
+#  (at your option) any later version.
+# 
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+# 
+#  You should have received a copy of the GNU General Public License
+#  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#***********************************************************************
+
    use strict;
    use warnings;
 
-#*********************************************************
-#  Perl script to convert AMBER top and crd files
-#  to GROMACS format, by Xin Li, 2012-07-20.
-#  Compatible with GLYCAM force field.
-#*********************************************************
-
    printf "\n";
-   printf "**************************************\n";
-   printf "*    === AMBER >>> to >>> GMX ===    *\n";
-   printf "*              by Xin Li             *\n";
-   printf "*         version 2012-07-20         *\n";
-   printf "**************************************\n";
+   printf "***********************************************\n";
+   printf "*       ==== AMBER >>> to >>> GMX ====        *\n";
+   printf "*            Copyright (C) Xin Li             *\n";
+   printf "*                                             *\n";
+   printf "*      This program is free software and      *\n";
+	printf "*      comes with ABSOLUTELY NO WARRANTY.     *\n";
+   printf "*                                             *\n";
+	printf "*               Licensed under                *\n";
+	printf "*         GNU General Public License          *\n";
+	printf "*                (Version 2)                  *\n";
+   printf "***********************************************\n";
    printf "\n";
-   printf "Usage: perl amber_to_gmx_by_XL.pl \\\n";
-   printf "       -top [name_of_amber_top_file] \\\n";
-   printf "       -crd [name_of_amber_crd_file] \\\n";
-   printf "       -name [name_of_your_molecule] \\\n";
-   printf "       -glycam [yes_or_no]\n";
+   printf "    Usage: perl amber_to_gmx_by_XL.pl \\\n";
+   printf "           -top [name_of_amber_top_file] \\\n";
+   printf "           -crd [name_of_amber_crd_file] \\\n";
+   printf "           -name [name_of_your_molecule] \\\n";
+   printf "           -glycam [yes_or_no]\n";
    printf "\n";
 
    if (@ARGV==0) { exit; }
