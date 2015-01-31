@@ -30,11 +30,11 @@
    printf "*            Copyright (C) Xin Li             *\n";
    printf "*                                             *\n";
    printf "*      This program is free software and      *\n";
-	printf "*      comes with ABSOLUTELY NO WARRANTY.     *\n";
+   printf "*      comes with ABSOLUTELY NO WARRANTY.     *\n";
    printf "*                                             *\n";
-	printf "*               Licensed under                *\n";
-	printf "*         GNU General Public License          *\n";
-	printf "*                (Version 2)                  *\n";
+   printf "*               Licensed under                *\n";
+   printf "*         GNU General Public License          *\n";
+   printf "*                (Version 2)                  *\n";
    printf "***********************************************\n";
    printf "\n";
    printf "    Usage: perl amber_to_gmx_by_XL.pl \\\n";
