@@ -5,11 +5,11 @@
 #  Convert AMBER top and crd files to GROMACS format
 #  Compatible with GLYCAM force field 
 #
-#  Copyright (C) 2012-2015 Xin Li <lixin.reco@gmail.com>
+#  Copyright (C) 2012-, Xin Li
 #
-#  This program is free software; you can redistribute it and/or modify
+#  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
-#  the Free Software Foundation; either version 2 of the License, or
+#  the Free Software Foundation, either version 3 of the License, or
 #  (at your option) any later version.
 #
 #  This program is distributed in the hope that it will be useful,
@@ -17,9 +17,8 @@
 #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 #  GNU General Public License for more details.
 #
-#  You should have received a copy of the GNU General Public License along
-#  with this program; if not, write to the Free Software Foundation, Inc.,
-#  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+#  You should have received a copy of the GNU General Public License
+#  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #*************************************************************************
 
    use strict;
@@ -35,7 +34,7 @@
    printf "*                                             *\n";
    printf "*               Licensed under                *\n";
    printf "*         GNU General Public License          *\n";
-   printf "*                (Version 2)                  *\n";
+   printf "*                (Version 3)                  *\n";
    printf "***********************************************\n";
    printf "\n";
    printf "    Usage: perl amber_to_gmx_by_XL.pl \\\n";
@@ -98,16 +97,18 @@
          {
             chomp;
             s/^\%FLAG/<FLAG>/;
-            s/\s+//g;
-            $string .= $_."<FLAG> ";
+            $string .= $_."<FLAG>";
+         }
+         else
+         {
+#           do nothing
          }
       }
 #     read data 
       else
       {
          chomp;
-         s/\s+/ /g;
-         $string .= $_." ";
+         $string .= $_;
       }
 
    }
@@ -117,6 +118,14 @@
    $string =~ s/^<FLAG>//;
 #  split the string 
    my @array = split "<FLAG>",$string;
+#  remove spaces in the keys
+   for my $i (0 .. @array-1)
+   {
+      if ($i % 2 == 0)
+      {
+         $array[$i] =~ s/\s+//g;
+      }
+   }
 #  change the array into hash
    my %hash = @array;
 
@@ -125,42 +134,43 @@
 #  see http://ambermd.org/formats.html#topology
 #
 
-#  POINTERS
+#  POINTERS (10i8)
    $_ = $hash{"POINTERS"};
-   @_ = (split);
+#  NOTE: split_by_width gives an array that starts with index 1
+   @_ = split_by_width($_, 8);
 
-   my $NATOM    = $_[0] ;  # total number of atoms 
-   my $NTYPES   = $_[1] ;  # total number of distinct atom types (distinct LJ params - X.L.)
-   my $NBONH    = $_[2] ;  # number of bonds containing hydrogen
-   my $MBONA    = $_[3] ;  # number of bonds not containing hydrogen
-   my $NTHETH   = $_[4] ;  # number of angles containing hydrogen
-   my $MTHETA   = $_[5] ;  # number of angles not containing hydrogen
-   my $NPHIH    = $_[6] ;  # number of dihedrals containing hydrogen
-   my $MPHIA    = $_[7] ;  # number of dihedrals not containing hydrogen
-   my $NHPARM   = $_[8] ;  # currently not used
-   my $NPARM    = $_[9] ;  # used to determine if addles created prmtop
-   my $NNB      = $_[10];  # number of excluded atoms
-   my $NRES     = $_[11];  # number of residues
-   my $NBONA    = $_[12];  # MBONA + number of constraint bonds
-   my $NTHETA   = $_[13];  # MTHETA + number of constraint angles
-   my $NPHIA    = $_[14];  # MPHIA + number of constraint dihedrals
-   my $NUMBND   = $_[15];  # number of unique bond types
-   my $NUMANG   = $_[16];  # number of unique angle types
-   my $NPTRA    = $_[17];  # number of unique dihedral types
-   my $NATYP    = $_[18];  # number of atom types in parameter file, see SOLTY below
-   my $NPHB     = $_[19];  # number of distinct 10-12 hydrogen bond pair types
-   my $IFPERT   = $_[20];  # set to 1 if perturbation info is to be read in
-   my $NBPER    = $_[21];  # number of bonds to be perturbed
-   my $NGPER    = $_[22];  # number of angles to be perturbed
-   my $NDPER    = $_[23];  # number of dihedrals to be perturbed
-   my $MBPER    = $_[24];  # number of bonds with atoms completely in perturbed group
-   my $MGPER    = $_[25];  # number of angles with atoms completely in perturbed group
-   my $MDPER    = $_[26];  # number of dihedrals with atoms completely in perturbed groups
-   my $IFBOX    = $_[27];  # set to 1 if standard periodic box, 2 when truncated octahedral
-   my $NMXRS    = $_[28];  # number of atoms in the largest residue
-   my $IFCAP    = $_[29];  # set to 1 if the CAP option from edit was specified
-   my $NUMEXTRA = $_[30];  # number of extra points found in topology
-   my $NCOPY    = $_[31];  # number of PIMD slices / number of beads
+   my $NATOM    = $_[1] ;  # total number of atoms 
+   my $NTYPES   = $_[2] ;  # total number of distinct atom types (distinct LJ params - XL)
+   my $NBONH    = $_[3] ;  # number of bonds containing hydrogen
+   my $MBONA    = $_[4] ;  # number of bonds not containing hydrogen
+   my $NTHETH   = $_[5] ;  # number of angles containing hydrogen
+   my $MTHETA   = $_[6] ;  # number of angles not containing hydrogen
+   my $NPHIH    = $_[7] ;  # number of dihedrals containing hydrogen
+   my $MPHIA    = $_[8] ;  # number of dihedrals not containing hydrogen
+   my $NHPARM   = $_[9] ;  # currently not used
+   my $NPARM    = $_[10];  # used to determine if addles created prmtop
+   my $NNB      = $_[11];  # number of excluded atoms
+   my $NRES     = $_[12];  # number of residues
+   my $NBONA    = $_[13];  # MBONA + number of constraint bonds
+   my $NTHETA   = $_[14];  # MTHETA + number of constraint angles
+   my $NPHIA    = $_[15];  # MPHIA + number of constraint dihedrals
+   my $NUMBND   = $_[16];  # number of unique bond types
+   my $NUMANG   = $_[17];  # number of unique angle types
+   my $NPTRA    = $_[18];  # number of unique dihedral types
+   my $NATYP    = $_[19];  # number of atom types in parameter file, see SOLTY below
+   my $NPHB     = $_[10];  # number of distinct 10-12 hydrogen bond pair types
+   my $IFPERT   = $_[21];  # set to 1 if perturbation info is to be read in
+   my $NBPER    = $_[22];  # number of bonds to be perturbed
+   my $NGPER    = $_[23];  # number of angles to be perturbed
+   my $NDPER    = $_[24];  # number of dihedrals to be perturbed
+   my $MBPER    = $_[25];  # number of bonds with atoms completely in perturbed group
+   my $MGPER    = $_[26];  # number of angles with atoms completely in perturbed group
+   my $MDPER    = $_[27];  # number of dihedrals with atoms completely in perturbed groups
+   my $IFBOX    = $_[28];  # set to 1 if standard periodic box, 2 when truncated octahedral
+   my $NMXRS    = $_[29];  # number of atoms in the largest residue
+   my $IFCAP    = $_[20];  # set to 1 if the CAP option from edit was specified
+   my $NUMEXTRA = $_[31];  # number of extra points found in topology
+   my $NCOPY    = $_[32];  # number of PIMD slices / number of beads
 
 #  print information on screen
 
@@ -184,42 +194,41 @@
 #       AMBER_ATOM_TYPE
 #*********************************************************
 
-#  ATOM_NAME (Note: add an arbitrary element to $_ 
-#             so that the array starts from index 1)
-   $_ = "zero  ".$hash{"ATOM_NAME"};
+#  ATOM_NAME (20A4)
 #  save data in corresponding array
-   my @IGRAPH = (split);
+   $_ = $hash{"ATOM_NAME"};
+   my @IGRAPH = split_by_width($_, 4);
 #  check the size of the array
    die "Error: incorrect number of ATOM_NAME!\n"
       if ( $NATOM != @IGRAPH-1 );
 
-#  ATOM_TYPE_INDEX
-   $_ = "zero  ".$hash{"ATOM_TYPE_INDEX"};
-   my @IAC = (split);
+#  ATOM_TYPE_INDEX (10I8)
+   $_ = $hash{"ATOM_TYPE_INDEX"};
+   my @IAC = split_by_width($_, 8);
    die "Error: incorrect number of ATOM_TYPE_INDEX!\n"
       if ( $NATOM != @IAC-1 );
 
-#  NONBONDED_PARM_INDEX
-   $_ = "zero  ".$hash{"NONBONDED_PARM_INDEX"};
-   my @ICO = (split);
+#  NONBONDED_PARM_INDEX (10I8)
+   $_ = $hash{"NONBONDED_PARM_INDEX"};
+   my @ICO = split_by_width($_, 8);
    die "Error: incorrect number of NONBONDED_PARM_INDEX!\n"
       if ( $NTYPES*$NTYPES != @ICO-1 );
 
-#  LENNARD_JONES_ACOEF
-   $_ = "zero  ".$hash{"LENNARD_JONES_ACOEF"};
-   my @CN1 = (split);
+#  LENNARD_JONES_ACOEF (5E16.8)
+   $_ = $hash{"LENNARD_JONES_ACOEF"};
+   my @CN1 = split_by_width($_, 16);
    die "Error: incorrect number of LENNARD_JONES_ACOEF!\n"
       if ( $NTYPES*($NTYPES+1)/2 != @CN1-1 );
 
-#  LENNARD_JONES_BCOEF
-   $_ = "zero  ".$hash{"LENNARD_JONES_BCOEF"};
-   my @CN2 = (split);
+#  LENNARD_JONES_BCOEF (5E16.8)
+   $_ = $hash{"LENNARD_JONES_BCOEF"};
+   my @CN2 = split_by_width($_, 16);
    die "Error: incorrect number of LENNARD_JONES_BCOEF!\n"
       if ( $NTYPES*($NTYPES+1)/2 != @CN2-1 );
 
-#  AMBER_ATOM_TYPE
-   $_ = "zero  ".$hash{"AMBER_ATOM_TYPE"};
-   my @ISYMBL = (split);
+#  AMBER_ATOM_TYPE (20A4)
+   $_ = $hash{"AMBER_ATOM_TYPE"};
+   my @ISYMBL = split_by_width($_, 4);
    die "Error: incorrect number of AMBER_ATOM_TYPE!\n"
       if ( $NATOM != @ISYMBL-1 );
 
@@ -227,28 +236,29 @@
 #  Read CHARGE, MASS, RESIDUE_LABEL, RESIDUE_POINTER
 #*********************************************************
 
-#  CHARGE
-   $_ = "zero  ".$hash{"CHARGE"};
-   my @CHARGE = (split);
+#  CHARGE (5E16.8)
+   $_ = $hash{"CHARGE"};
+   my @CHARGE = split_by_width($_, 16);
    die "Error: incorrect number of CHARGE!\n"
       if ( $NATOM != @CHARGE-1 );
 
-#  MASS
-   $_ = "zero  ".$hash{"MASS"};
-   my @AMASS = (split);
+#  MASS (5E16.8)
+   $_ = $hash{"MASS"};
+   my @AMASS = split_by_width($_, 16);
    die "Error: incorrect number of MASS!\n"
       if ( $NATOM != @AMASS-1 );
 
-#  RESIDUE_LABEL
-   $_ = "zero  ".$hash{"RESIDUE_LABEL"};
-   my @LBRES = (split);
+#  RESIDUE_LABEL (20A4)
+   $_ = $hash{"RESIDUE_LABEL"};
+   my @LBRES = split_by_width($_, 4);
    die "Error: incorrect number of RESIDUE_LABEL!\n"
       if ( $NRES != @LBRES-1 );
 
-#  RESIDUE_POINTER
-   $_ = "zero  ".$hash{"RESIDUE_POINTER"};
-   my @IPRES = (split);
-   push @IPRES, $NATOM+1; # add NATOM+1 to @IPRES
+#  RESIDUE_POINTER (10I8)
+   $_ = $hash{"RESIDUE_POINTER"};
+   my @IPRES = split_by_width($_, 8);
+#  add NATOM+1 to @IPRES
+   push @IPRES, $NATOM+1;
    die "Error: incorrect number of RESIDUE_POINTER!\n"
       if ( $NRES != @IPRES-2 );
 
@@ -259,46 +269,44 @@
 
    printf "Reading bonds ...\n";
 
-   my $ibond;
-
-#  BOND_FORCE_CONSTANT
-   $_ = "zero  ".$hash{"BOND_FORCE_CONSTANT"};
-   my @RK = (split);
+#  BOND_FORCE_CONSTANT (5E16.8)
+   $_ = $hash{"BOND_FORCE_CONSTANT"};
+   my @RK = split_by_width($_, 16);
    die "Error: incorrect number of BOND_FORCE_CONSTANT!\n"
       if ( $NUMBND != @RK-1 );
 
-#  BOND_EQUIL_VALUE
-   $_ = "zero  ".$hash{"BOND_EQUIL_VALUE"};
-   my @REQ = (split);
+#  BOND_EQUIL_VALUE (5E16.8)
+   $_ = $hash{"BOND_EQUIL_VALUE"};
+   my @REQ = split_by_width($_, 16);
    die "Error: incorrect number of BOND_EQUIL_VALUE!\n"
       if ( $NUMBND != @REQ-1 );
 
-#  BONDS_INC_HYDROGEN
-   $_ = "zero  ".$hash{"BONDS_INC_HYDROGEN"};
+#  BONDS_INC_HYDROGEN (10I8)
+   $_ = $hash{"BONDS_INC_HYDROGEN"};
 
-   @_ = (split);
+   @_ = split_by_width($_, 8);
    die "Error: incorrect number of BONDS_INC_HYDROGEN!\n"
       if ( $NBONH*3 != @_-1 );
 
    my @IBH; my @JBH; my @ICBH;
 
-   for $ibond (1..$NBONH)
+   for my $ibond (1..$NBONH)
    {
       $IBH[$ibond]  = $_[($ibond-1)*3+1];
       $JBH[$ibond]  = $_[($ibond-1)*3+2];
       $ICBH[$ibond] = $_[($ibond-1)*3+3];
    }
 
-#  BONDS_WITHOUT_HYDROGEN
-   $_ = "zero  ".$hash{"BONDS_WITHOUT_HYDROGEN"};
+#  BONDS_WITHOUT_HYDROGEN (10I8)
+   $_ = $hash{"BONDS_WITHOUT_HYDROGEN"};
 
-   @_ = (split);
+   @_ = split_by_width($_, 8);
    die "Error: incorrect number of BONDS_WITHOUT_HYDROGEN!\n"
       if ( $NBONA*3 != @_-1 );
 
    my @IB; my @JB; my @ICB;
 
-   for $ibond (1..$NBONA)
+   for my $ibond (1..$NBONA)
    {
       $IB[$ibond]  = $_[($ibond-1)*3+1];
       $JB[$ibond]  = $_[($ibond-1)*3+2];
@@ -312,30 +320,28 @@
 
    printf "Reading angles ...\n";
 
-   my $iang;
-
-#  ANGLE_FORCE_CONSTANT
-   $_ = "zero  ".$hash{"ANGLE_FORCE_CONSTANT"};
-   my @TK = (split);
+#  ANGLE_FORCE_CONSTANT (5E16.8)
+   $_ = $hash{"ANGLE_FORCE_CONSTANT"};
+   my @TK = split_by_width($_, 16);
    die "Error: incorrect number of ANGLE_FORCE_CONSTANT!\n"
       if ( $NUMANG != @TK-1 );
 
-#  ANGLE_EQUIL_VALUE
-   $_ = "zero  ".$hash{"ANGLE_EQUIL_VALUE"};
-   my @TEQ = (split);
+#  ANGLE_EQUIL_VALUE (5E16.8)
+   $_ = $hash{"ANGLE_EQUIL_VALUE"};
+   my @TEQ = split_by_width($_, 16);
    die "Error: incorrect number of ANGLE_EQUIL_VALUE!\n"
       if ( $NUMANG != @TEQ-1 );
 
-#  ANGLES_INC_HYDROGEN
-   $_ = "zero  ".$hash{"ANGLES_INC_HYDROGEN"};
+#  ANGLES_INC_HYDROGEN (10I8)
+   $_ = $hash{"ANGLES_INC_HYDROGEN"};
 
-   @_ = (split);
+   @_ = split_by_width($_, 8);
    die "Error: incorrect number of ANGLES_INC_HYDROGEN!\n"
       if ( $NTHETH*4 != @_-1 );
 
    my @ITH; my @JTH; my @KTH; my @ICTH;
 
-   for $iang (1..$NTHETH)
+   for my $iang (1..$NTHETH)
    {
       $ITH[$iang]  = $_[($iang-1)*4+1];
       $JTH[$iang]  = $_[($iang-1)*4+2];
@@ -343,16 +349,16 @@
       $ICTH[$iang] = $_[($iang-1)*4+4];
    }
 
-#  ANGLES_WITHOUT_HYDROGEN
-   $_ = "zero  ".$hash{"ANGLES_WITHOUT_HYDROGEN"};
+#  ANGLES_WITHOUT_HYDROGEN (10I8)
+   $_ = $hash{"ANGLES_WITHOUT_HYDROGEN"};
 
-   @_ = (split);
+   @_ = split_by_width($_, 8);
    die "Error: incorrect number of ANGLES_WITHOUT_HYDROGEN!\n"
       if ( $NTHETA*4 != @_-1 );
 
    my @IT; my @JT; my @KT; my @ICT;
 
-   for $iang (1..$NTHETA)
+   for my $iang (1..$NTHETA)
    {
       $IT[$iang]  = $_[($iang-1)*4+1];
       $JT[$iang]  = $_[($iang-1)*4+2];
@@ -370,36 +376,34 @@
    printf "Reading dihedrals ...\n";
    printf "\n";
 
-   my $idih;
-
-#  DIHEDRAL_FORCE_CONSTANT
-   $_ = "zero  ".$hash{"DIHEDRAL_FORCE_CONSTANT"};
-   my @PK = (split);
+#  DIHEDRAL_FORCE_CONSTANT (5E16.8)
+   $_ = $hash{"DIHEDRAL_FORCE_CONSTANT"};
+   my @PK = split_by_width($_, 16);
    die "Error: incorrect number of DIHEDRAL_FORCE_CONSTANT!\n"
       if ( $NPTRA != @PK-1 );
 
-#  DIHEDRAL_PERIODICITY
-   $_ = "zero  ".$hash{"DIHEDRAL_PERIODICITY"};
-   my @PN = (split);
+#  DIHEDRAL_PERIODICITY (5E16.8)
+   $_ = $hash{"DIHEDRAL_PERIODICITY"};
+   my @PN = split_by_width($_, 16);
    die "Error: incorrect number of DIHEDRAL_PERIODICITY!\n"
       if ( $NPTRA != @PN-1 );
 
-#  DIHEDRAL_PHASE
-   $_ = "zero  ".$hash{"DIHEDRAL_PHASE"};
-   my @PHASE = (split);
+#  DIHEDRAL_PHASE (5E16.8)
+   $_ = $hash{"DIHEDRAL_PHASE"};
+   my @PHASE = split_by_width($_, 16);
    die "Error: incorrect number of DIHEDRAL_PHASE!\n"
       if ( $NPTRA != @PHASE-1 );
 
-#  DIHEDRALS_INC_HYDROGEN
-   $_ = "zero  ".$hash{"DIHEDRALS_INC_HYDROGEN"};
+#  DIHEDRALS_INC_HYDROGEN (10I8)
+   $_ = $hash{"DIHEDRALS_INC_HYDROGEN"};
 
-   @_ = (split);
+   @_ = split_by_width($_, 8);
    die "Error: incorrect number of DIHEDRALS_INC_HYDROGEN!\n"
       if ( $NPHIH*5 != @_-1 );
 
    my @IPH; my @JPH; my @KPH; my @LPH; my @ICPH;
 
-   for $idih (1..$NPHIH)
+   for my $idih (1..$NPHIH)
    {
       $IPH[$idih]  = $_[($idih-1)*5+1];
       $JPH[$idih]  = $_[($idih-1)*5+2];
@@ -408,16 +412,16 @@
       $ICPH[$idih] = $_[($idih-1)*5+5];
    }
 
-#  DIHEDRALS_WITHOUT_HYDROGEN
-   $_ = "zero  ".$hash{"DIHEDRALS_WITHOUT_HYDROGEN"};
+#  DIHEDRALS_WITHOUT_HYDROGEN (10I8)
+   $_ = $hash{"DIHEDRALS_WITHOUT_HYDROGEN"};
 
-   @_ = (split);
+   @_ = split_by_width($_, 8);
    die "Error: incorrect number of DIHEDRALS_WITHOUT_HYDROGEN!\n"
       if ( $NPHIA*5 != @_-1 );
 
    my @IP; my @JP; my @KP; my @LP; my @ICP;
 
-   for $idih (1..$NPHIA)
+   for my $idih (1..$NPHIA)
    {
       $IP[$idih]  = $_[($idih-1)*5+1];
       $JP[$idih]  = $_[($idih-1)*5+2];
@@ -459,11 +463,10 @@
 #  epsilon = BCOEF**2 / ( 4.0 * ACOEF ) ;
 #  remember to change unit: angstrom->nm, kcal/mol->kJ/mol
 
-   my $i; my $itype; 
    my $acoef; my $bcoef;
    my @sigma; my @epsilon;
 
-   for $i (1..$NATOM)
+   for my $i (1..$NATOM)
    {
       die "Error: negative value of ICO for atom $i !\n"
          if ( $ICO[$NTYPES*($IAC[$i]-1)+$IAC[$i]] < 0.0 );
@@ -488,18 +491,18 @@
    }
 
    my %atomtype;
-   for $i (1..$NATOM)
+   for my $i (1..$NATOM)
    {
       $atomtype{$ISYMBL[$i]} = 0;
    }
    printf GTOP "[ atomtypes ]\n";
    printf GTOP "%-8s%-10s%-10s%-10s%-7s%15s%15s\n",
       ";name", "bond_type", "mass", "charge", "ptype", "sigma", "epsilon";
-   for $i (1..$NATOM)
+   for my $i (1..$NATOM)
    {
       if ($atomtype{$ISYMBL[$i]}==0)
       {
-         for $itype (1..$NTYPES)
+         for my $itype (1..$NTYPES)
          {
             if ( $IAC[$i]==$itype )
             {
@@ -517,8 +520,6 @@
 #  Write [ moleculetype ] and [ atoms ]
 #*********************************************************
 
-   my $ires;
-
    printf GTOP "[ moleculetype ]\n";
    printf GTOP "%-20s%-10s\n", ";name", "nrexcl";
    printf GTOP "%-20s%-10d\n", $options{"-name"}, 3;
@@ -528,41 +529,55 @@
    printf "\n";
 
 #  truncate the charge at predefined precision (10^-6)
+   my $prec = 1.0e-06;
    my $qtot = 0.0;
    my $qint = 0;
-   my $maxqid = 1;
-   for $i (1..$NATOM)
+   my $qmax = 0.0;
+   for my $i (1..$NATOM)
    {
       $CHARGE[$i] /= 18.2223; # change to electron charge unit
 #     truncate the charge at 10^-6 precision
-      if ( $CHARGE[$i] > 0.0 )
-      {
-         $CHARGE[$i] = int( $CHARGE[$i] * 10**6 + 0.5 ) / 10**6 ;
-      }
-      elsif ( $CHARGE[$i] < 0.0 )
-      {
-         $CHARGE[$i] = int( $CHARGE[$i] * 10**6 - 0.5 ) / 10**6 ;
-      }
+      $CHARGE[$i] = round_to_int($CHARGE[$i] / $prec) * $prec;
 #     calculate sum of charges
       $qtot += $CHARGE[$i];
-#     get the atom id with maximal charge
-      $maxqid = $i if ( abs($CHARGE[$i]) > abs($CHARGE[$maxqid]) );
+#     get maximum charge
+      $qmax = $CHARGE[$i] if ( abs($CHARGE[$i]) > $qmax );
+   }
+#  list all atoms with maximum charge
+   my @qmax_id_list = ();
+   for my $i (1..$NATOM)
+   {
+      if ( $CHARGE[$i] == $qmax )
+      {
+         push @qmax_id_list, $i;
+      }
    }
 #  remove non-integer charge due to truncated precision
    printf "The system has %f net charges.\n", $qtot;
-   if ( $qtot > 0.0 )
+   $qint = round_to_int($qtot);
+   if ( abs($qtot-$qint) >= $prec )
    {
-      $qint = int( $qtot + 0.5 );
-   }
-   elsif ( $qtot < 0.0 )
-   {
-      $qint = int( $qtot - 0.5 );
-   }
-   if ( $qtot != $qint )
-   {
-      $CHARGE[$maxqid] -= $qtot-$qint ;
-      printf "The charge of %f is removed from atom id %d.\n",
-         $qtot-$qint, $maxqid;
+      my $q_diff = round_to_int(($qtot - $qint) / $prec);
+      my $factor = $q_diff > 0 ? 1.0 : -1.0;
+      my $num_qmax = @qmax_id_list + 0;
+      my $ave_diff = int($q_diff / $num_qmax);
+      my $res_diff = $q_diff % $num_qmax;
+      for my $ii ( 0 .. $num_qmax-1 )
+      {
+         my $index = $qmax_id_list[$ii];
+         $CHARGE[$index] -= $ave_diff * $prec;
+         if ($ii < $res_diff)
+         {
+            $CHARGE[$index] -= $prec * $factor;
+            printf "The charge of %f is removed from atom id %d.\n",
+               ($ave_diff + $factor) * $prec, $index;
+         }
+         else
+         {
+            printf "The charge of %f is removed from atom id %d.\n",
+               $ave_diff * $prec, $index;
+         }
+      }
    }
    printf "\n";
 
@@ -571,10 +586,10 @@
    printf GTOP "%-6s%-6s%-6s%-6s%-6s%-6s%13s%13s ; qtot\n",
       ";nr", "type", "resnr", "res", "atom", "cgnr", "charge", "mass";
    $qtot = 0.0;
-   for $ires (1..$NRES)
+   for my $ires (1..$NRES)
    {
       printf GTOP ";residue %d, %s\n", $ires, $LBRES[$ires];
-      for $i ($IPRES[$ires]..$IPRES[$ires+1]-1)
+      for my $i ($IPRES[$ires]..$IPRES[$ires+1]-1)
       {
          $qtot += $CHARGE[$i];
          printf GTOP "%-6d%-6s%-6d%-6s%-6s%-6d%13.6f%13.6f ; qtot %f\n",
@@ -608,7 +623,7 @@
 
    printf GTOP "[ bonds ]\n";
    printf GTOP "%-8s%-8s%-8s%15s%15s\n", ";ai", "aj", "funct", "r", "k";
-   for $ibond (1..$NBONH)
+   for my $ibond (1..$NBONH)
    {
       printf GTOP "%-8d%-8d%-8d%15.6e%15.6e ; %s-%s\n",
          abs($IBH[$ibond])/3+1, 
@@ -619,7 +634,7 @@
          $IGRAPH[abs($IBH[$ibond])/3+1],
          $IGRAPH[abs($JBH[$ibond])/3+1];
    }
-   for $ibond (1..$NBONA)
+   for my $ibond (1..$NBONA)
    {
       printf GTOP "%-8d%-8d%-8d%15.6e%15.6e ; %s-%s\n",
          abs($IB[$ibond])/3+1,
@@ -656,7 +671,7 @@
       printf GTOP "%-6s%-6s%-6s%13s%13s%13s%15s%15s\n", 
          ";ai", "aj", "funct", "fudgeQQ", "qi", "qj", "sigma", "epsilon";
  
-      for $idih (1..$NPHIH)
+      for my $idih (1..$NPHIH)
       {
 #        skip when the third atom is negative
          if ( $KPH[$idih] > 0.0 )
@@ -671,7 +686,7 @@
          }
       }
  
-      for $idih (1..$NPHIA)
+      for my $idih (1..$NPHIA)
       {
 #        skip when the third atom is negative
          if ( $KP[$idih] > 0.0 )
@@ -695,7 +710,7 @@
       printf GTOP "[ pairs ]\n";
       printf GTOP "%-8s%-8s%-8s\n", ";ai", "aj", "funct";
  
-      for $idih (1..$NPHIH)
+      for my $idih (1..$NPHIH)
       {
 #        skip when the third atom is negative
          if ( $KPH[$idih] > 0.0 )
@@ -707,7 +722,7 @@
          }
       }
  
-      for $idih (1..$NPHIA)
+      for my $idih (1..$NPHIA)
       {
 #        skip when the third atom is negative
          if ( $KP[$idih] > 0.0 )
@@ -748,7 +763,7 @@
    printf GTOP "[ angles ]\n";
    printf GTOP "%-7s%-7s%-7s%-7s%15s%15s\n", 
       ";ai", "aj", "ak", "funct", "theta", "cth";
-   for $iang (1..$NTHETH)
+   for my $iang (1..$NTHETH)
    {
       printf GTOP "%-7d%-7d%-7d%-7d%15.6e%15.6e ; %s-%s-%s\n",
          abs($ITH[$iang])/3+1,
@@ -761,7 +776,7 @@
          $IGRAPH[abs($JTH[$iang])/3+1],
          $IGRAPH[abs($KTH[$iang])/3+1];
    }
-   for $iang (1..$NTHETA)
+   for my $iang (1..$NTHETA)
    {
       printf GTOP "%-7d%-7d%-7d%-7d%15.6e%15.6e ; %s-%s-%s\n",
          abs($IT[$iang])/3+1,
@@ -798,12 +813,9 @@
 #  E_Torsion = V_n/2 * [ 1 + cos( n phi - phase ) ]
 #  Note: The PK value is equal to V_n/2 in AMBER FF literature
 
-#  Modified 2012-06-29 by Xin Li
-
-   my $ip;
    my ($p_s, $k_p, $p_n);
 
-   for $ip (1..$NPTRA)
+   for my $ip (1..$NPTRA)
    {
 #     convert kcal/mol to kJ/mol
       $PK[$ip] *= 4.184;
@@ -823,7 +835,7 @@
 
 #  dihedrals containing H atoms
 
-   for $idih (1..$NPHIH)
+   for my $idih (1..$NPHIH)
    {
 #     phase (phi_s), force constant (k_phi), and multiplicity
       $p_s = $PHASE[$ICPH[$idih]];
@@ -853,7 +865,7 @@
 
 #  dihedrals without H atoms
 
-   for $idih (1..$NPHIA)
+   for my $idih (1..$NPHIA)
    {
 #     phase (phi_s), force constant (k_phi), and multiplicity
       $p_s = $PHASE[$ICP[$idih]];
@@ -882,8 +894,6 @@
    }
 
    printf GTOP "\n";
-
-#  End of modification 2012-06-29
 
 #*********************************************************
 #  Write [ system ] and [ molecules ]
@@ -933,7 +943,7 @@
 #  close amber crd file
    close ACRD;
 #  split coordinates
-   $string = "zero  ".$string;
+   $string = "* ".$string;
    my @xyz = split " ",$string;
    if ( $NATOM*3 != @xyz-1 )
    {
@@ -952,9 +962,9 @@
 #  write gmx gro file
 #  remember to convert angstrom to nm
    printf GGRO "%5d\n", $NATOM;
-   for $ires (1..$NRES)
+   for my $ires (1..$NRES)
    {
-      for $i ($IPRES[$ires]..$IPRES[$ires+1]-1)
+      for my $i ($IPRES[$ires]..$IPRES[$ires+1]-1)
       {
          printf GGRO "%5d%5s%5s%5d%9.4f%9.4f%9.4f\n",
             $ires, $LBRES[$ires], $IGRAPH[$i], $i, 
@@ -972,6 +982,49 @@
 
 #  All done!
    printf "All done!\n";
+
+#*********************************************************
+#  function: split string by fixed-width and 
+#  return an array that starts with index 1
+#*********************************************************
+
+   sub split_by_width
+   {
+      die unless @_ == 2;
+      my $string = $_[0];
+      my $width  = $_[1];
+#     place holder for index 0
+      my @array = ("*");
+#     split with fixed width and then remove spaces
+      while (length($string) > 0) 
+      {
+         my $substring = substr $string, 0, $width;
+         $substring =~ s/\s+//g;
+         push @array, $substring;
+         $string = substr $string, $width;
+      }
+      return @array;
+   }
+
+#*********************************************************
+#  function: round to integer
+#*********************************************************
+
+   sub round_to_int
+   {
+      die unless @_ == 1;
+      my $num = $_[0];
+      my $rounded = $num;
+      if ( $num > 0.0 )
+      {
+         $rounded = int( $num + 0.5 );
+      }
+      elsif ( $num < 0.0 )
+      {
+         $rounded = int( $num - 0.5 );
+      }
+      return $rounded;
+   }
 
 #*********************************************************
 #  End of program
